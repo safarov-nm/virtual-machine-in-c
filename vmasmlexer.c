@@ -180,8 +180,8 @@ TokenType check_builtin_keywords(const char *name){
 }    
 
 Token generate_keyword(char *current, int *current_index, int line, int *character){
-    // char *keyword_name = malloc(sizeof(char) * 16);
-    static char keyword_name[16];
+    char *keyword_name = malloc(sizeof(char) * 16);
+    // static char keyword_name[16];
     int keyword_length = 0;
     while(isalpha(current[*current_index])){
         keyword_name[keyword_length] = current[*current_index];
@@ -197,7 +197,8 @@ Token generate_keyword(char *current, int *current_index, int line, int *charact
 }
 
 Token generate_int_number(char *current, int *current_index, int line, int *character) {
-    static char number[16];
+    char *number = malloc(sizeof(char) * 16);
+    // static char number[16];
     int keyword_length = 0;
     while(isdigit(current[*current_index])){
         number[keyword_length] = current[*current_index];
@@ -233,7 +234,7 @@ Token pop_token(Lexer *lexer) {
     return lexer->tokens[lexer->size];
 }
 
-int lexer(){
+Lexer lexer() {
     int length;
     char *current = open_file("test.vmasm", &length);
     int current_index = 0;
@@ -265,10 +266,9 @@ int lexer(){
         character++;
     }
 
-    for (int i = 0; i < lex.size; ++i) {
-        print_token(lex.tokens[i]);
-    }
+    // for (int i = 0; i < lex.size; ++i) {
+    //     print_token(lex.tokens[i]);
+    // }
 
-
-    return 0;
+    return lex;
 }

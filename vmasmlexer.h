@@ -41,9 +41,10 @@ typedef struct {
 
 typedef struct {
     Token tokens[MAX_TOKEN_COUNT];
-    size_t size;
+    int size;
 } Lexer;
 
-int lexer();
+Lexer lexer();
+void print_token(Token token);
 
 #endif // __VMASMLEXER_H

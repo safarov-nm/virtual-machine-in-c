@@ -280,8 +280,8 @@ void run_instructions(Machine *machine){
 
 }
 
-int main(){
-    lexer();
+int vm(){
+    // lexer();
     Machine *loaded_machine = malloc(sizeof(Machine));
     if (loaded_machine == NULL) {
         fprintf(stderr, "ERROR: Couldn't allocate memory for the machine\n");
@@ -301,5 +301,5 @@ int main(){
     free(loaded_machine->instructions);
     free(loaded_machine);
 
-    return 0;
+    return 0; // Successfully
 }

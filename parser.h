@@ -1,6 +1,9 @@
 #ifndef __PARSER_H
 #define __PARSER_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "vmasmlexer.h"
 #include "vmasmlexer.h"
 
 typedef struct TokenNode {
@@ -8,6 +11,8 @@ typedef struct TokenNode {
     struct TokenNode *next; // указатель на следующий узел
 } TokenNode;
 
-void parser(Lexer lex);
+TokenNode* parser(Lexer lex);
+void append(TokenNode **root, Token token);
+void print_list(TokenNode *root);
 
 #endif // __PARSER_H
