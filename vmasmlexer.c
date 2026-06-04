@@ -211,6 +211,28 @@ Token generate_int_number(char *current, int *current_index, int line, int *char
     return token;
 }
 
+void push_token(Lexer *lexer, Token token) {
+
+    if(lexer->size >= MAX_TOKEN_COUNT){
+        fprintf(stderr, "ERROR: Too many tokens!\n");
+        exit(1);
+    }
+    lexer->tokens[lexer->size] = token;
+    lexer->size++;
+
+}
+
+Token pop_token(Lexer *lexer) {
+
+    if (lexer->size <= 0) {
+        fprintf(stderr, "ERROR: There are no tokens!\n");
+        exit(1);
+    }
+
+    lexer->size--;
+    return lexer->tokens[lexer->size];
+}
+
 int lexer(){
     int length;
     char *current = open_file("test.vmasm", &length);
@@ -219,24 +241,34 @@ int lexer(){
     int line = 1;
     int character = 1;
 
-    while(current_index < length){
+    Lexer lex = {.size = 0};
+
+    while (current_index < length) {
         if(current[current_index] == '\n') {
             line++;
             character = 0;
         }
 
-        if(isalpha(current[current_index])) {
+        if (isalpha(current[current_index])) {
             Token token = generate_keyword(current, &current_index, line, &character);
+            push_token(&lex, token);
             current_index--;
             // print_token(token);
             // free(token.text);
-        } else if(isdigit(current[current_index])) {
+        } else if (isdigit(current[current_index])) {
             Token token = generate_int_number(current, &current_index, line, &character);
+            push_token(&lex, token);
             current_index--;
-            print_token(token);
+            //print_token(token);
         }         
         current_index++;
         character++;
     }
+
+    for (int i = 0; i < lex.size; ++i) {
+        print_token(lex.tokens[i]);
+    }
+
+
     return 0;
 }

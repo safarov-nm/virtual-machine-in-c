@@ -1,6 +1,8 @@
 #ifndef __VMASMLEXER_H
 #define __VMASMLEXER_H
 
+#define MAX_TOKEN_COUNT 1024
+
 typedef enum {
     TYPE_NONE = -1,
     TYPE_NOP = 0,
@@ -36,6 +38,11 @@ typedef struct {
     int line;
     int character;
 } Token;
+
+typedef struct {
+    Token tokens[MAX_TOKEN_COUNT];
+    size_t size;
+} Lexer;
 
 int lexer();
 
