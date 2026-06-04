@@ -29,6 +29,7 @@ typedef enum {
     INST_NZJMP,
     INST_PRINT,
     INST_HALT,
+    
 } Inst_Set;
 
 typedef struct {

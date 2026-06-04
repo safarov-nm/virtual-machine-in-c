@@ -14,6 +14,7 @@ Inst program[] = {
     DEF_INST_PUSH(12),
     DEF_INST_INDUP(2),
 };
+
 #define PROGRAM_SIZE (sizeof(program)/sizeof(program[0]))
 
 void push(Machine *machine, int value){

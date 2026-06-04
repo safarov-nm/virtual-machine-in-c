@@ -1,5 +1,5 @@
-push
-push
+push 15
+push 5
 nop
 pop
 indup
@@ -16,7 +16,7 @@ cmpg
 cmpl
 cmpge
 cmple
-jmp
+jmp 0
 zjmp
 nzjmp
 print

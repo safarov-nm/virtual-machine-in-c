@@ -116,6 +116,9 @@ void print_token(Token token){
     case TYPE_HALT:
         printf("TYPE HALT\n");
         break;
+    case TYPE_INT:
+        printf("TYPE INT\n");
+        break;
     }
     printf("text: %s, line: %d, character: %d\n", token.text, token.line, token.character);
 }
@@ -193,6 +196,21 @@ Token generate_keyword(char *current, int *current_index, int line, int *charact
     return token;
 }
 
+Token generate_int_number(char *current, int *current_index, int line, int *character) {
+    static char number[16];
+    int keyword_length = 0;
+    while(isdigit(current[*current_index])){
+        number[keyword_length] = current[*current_index];
+        *current_index += 1;
+        keyword_length++;
+    }
+    number[keyword_length] = '\0';
+    TokenType type = TYPE_INT;
+    *character += (keyword_length);
+    Token token = init_token(type, number, line, *character);
+    return token;
+}
+
 int lexer(){
     int length;
     char *current = open_file("test.vmasm", &length);
@@ -202,18 +220,20 @@ int lexer(){
     int character = 1;
 
     while(current_index < length){
-        if(current[current_index] == '\n'){
+        if(current[current_index] == '\n') {
             line++;
             character = 0;
         }
 
-        if(isalpha(current[current_index])){
+        if(isalpha(current[current_index])) {
             Token token = generate_keyword(current, &current_index, line, &character);
             current_index--;
-            print_token(token);
+            // print_token(token);
             // free(token.text);
-        } else if(isdigit(current[current_index])){
-            printf("NUMBERIC\n");
+        } else if(isdigit(current[current_index])) {
+            Token token = generate_int_number(current, &current_index, line, &character);
+            current_index--;
+            print_token(token);
         }         
         current_index++;
         character++;

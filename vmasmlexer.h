@@ -26,6 +26,8 @@ typedef enum {
     TYPE_NZJMP,
     TYPE_PRINT,
     TYPE_HALT,
+
+    TYPE_INT
 } TokenType;
 
 typedef struct {
