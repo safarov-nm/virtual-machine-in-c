@@ -5,17 +5,17 @@
 
 #include "vm.h"
 
-Inst program[] = {
-    DEF_INST_PUSH(1),
-    DEF_INST_PUSH(4),
-    DEF_INST_PUSH(6),
-    DEF_INST_PUSH(8),
-    DEF_INST_PUSH(10),
-    DEF_INST_PUSH(12),
-    DEF_INST_INDUP(2),
-};
+// Inst program[] = {
+//     DEF_INST_PUSH(1),
+//     DEF_INST_PUSH(4),
+//     DEF_INST_PUSH(6),
+//     DEF_INST_PUSH(8),
+//     DEF_INST_PUSH(10),
+//     DEF_INST_PUSH(12),
+//     DEF_INST_INDUP(2),
+// };
 
-#define PROGRAM_SIZE (sizeof(program)/sizeof(program[0]))
+// #define PROGRAM_SIZE (sizeof(program)/sizeof(program[0]))
 
 void push(Machine *machine, int value){
     if(machine->stack_size >= MAX_STACK_SIZE){
@@ -282,24 +282,24 @@ void run_instructions(Machine *machine){
 
 int vm(){
     // lexer();
-    Machine *loaded_machine = malloc(sizeof(Machine));
-    if (loaded_machine == NULL) {
-        fprintf(stderr, "ERROR: Couldn't allocate memory for the machine\n");
-        exit(1);
-    }
+    // Machine *loaded_machine = malloc(sizeof(Machine));
+    // if (loaded_machine == NULL) {
+    //     fprintf(stderr, "ERROR: Couldn't allocate memory for the machine\n");
+    //     exit(1);
+    // }
 
-    loaded_machine->stack_size = 0;
-    loaded_machine->program_size = PROGRAM_SIZE;
-    loaded_machine->instructions = program;
+    // loaded_machine->stack_size = 0;
+    // loaded_machine->program_size = PROGRAM_SIZE;
+    // loaded_machine->instructions = program;
     
-    write_program_to_file(loaded_machine, "test.vm");
-    loaded_machine = read_program_from_file(loaded_machine, "test.vm");
+    // write_program_to_file(loaded_machine, "test.vm");
+    // loaded_machine = read_program_from_file(loaded_machine, "test.vm");
     
-    run_instructions(loaded_machine);
-    // print_stack(loaded_machine);
+    // run_instructions(loaded_machine);
+    // // print_stack(loaded_machine);
 
-    free(loaded_machine->instructions);
-    free(loaded_machine);
+    // free(loaded_machine->instructions);
+    // free(loaded_machine);
 
     return 0; // Successfully
 }

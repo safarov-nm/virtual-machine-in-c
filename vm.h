@@ -44,29 +44,29 @@ typedef struct {
     Inst *instructions;
 } Machine;
 
-#define DEF_INST_NOP(x) {.type = INST_NOP}
-#define DEF_INST_PUSH(x) {.type = INST_PUSH, .value = x}
-#define DEF_INST_POP() {.type = INST_POP}
-#define DEF_INST_DUP() {.type = INST_DUP}
-#define DEF_INST_INDUP(i) {.type = INST_INDUP, .value = i}
-#define DEF_INST_SWAP() {.type = INST_SWAP}
-#define DEF_INST_INSWAP(i) {.type = INST_INSWAP, .value = i}
-#define DEF_INST_ADD() {.type = INST_ADD}
-#define DEF_INST_SUB() {.type = INST_SUB}
-#define DEF_INST_MUL() {.type = INST_MUL}
-#define DEF_INST_DIV() {.type = INST_DIV}
-#define DEF_INST_MOD() {.type = INST_MOD}
-#define DEF_INST_CMPE() {.type = INST_CMPE}
-#define DEF_INST_CMPNE() {.type = INST_CMPNE}
-#define DEF_INST_CMPG() {.type = INST_CMPG}
-#define DEF_INST_CMPL() {.type = INST_CMPL}
-#define DEF_INST_CMPGE() {.type = INST_CMPGE}
-#define DEF_INST_CMPLE() {.type = INST_CMPLE}
-#define DEF_INST_JMP(i) {.type = INST_JMP, .value = i}
-#define DEF_INST_ZJMP(i) {.type = INST_ZJMP, .value = i}
-#define DEF_INST_NZJMP(i) {.type = INST_NZJMP, .value = i}
-#define DEF_INST_PRINT() {.type = INST_PRINT}
-#define DEF_INST_HALT() {.type = INST_HALT}
+#define DEF_INST_NOP() (Inst){.type = INST_NOP}
+#define DEF_INST_PUSH(x) (Inst){.type = INST_PUSH, .value = x}
+#define DEF_INST_POP() (Inst){.type = INST_POP}
+#define DEF_INST_DUP() (Inst){.type = INST_DUP}
+#define DEF_INST_INDUP(i) (Inst){.type = INST_INDUP, .value = i}
+#define DEF_INST_SWAP() (Inst){.type = INST_SWAP}
+#define DEF_INST_INSWAP(i) (Inst){.type = INST_INSWAP, .value = i}
+#define DEF_INST_ADD() (Inst){.type = INST_ADD}
+#define DEF_INST_SUB() (Inst){.type = INST_SUB}
+#define DEF_INST_MUL() (Inst){.type = INST_MUL}
+#define DEF_INST_DIV() (Inst){.type = INST_DIV}
+#define DEF_INST_MOD() (Inst){.type = INST_MOD}
+#define DEF_INST_CMPE() (Inst){.type = INST_CMPE}
+#define DEF_INST_CMPNE() (Inst){.type = INST_CMPNE}
+#define DEF_INST_CMPG() (Inst){.type = INST_CMPG}
+#define DEF_INST_CMPL() (Inst){.type = INST_CMPL}
+#define DEF_INST_CMPGE() (Inst){.type = INST_CMPGE}
+#define DEF_INST_CMPLE() (Inst){.type = INST_CMPLE}
+#define DEF_INST_JMP(i) (Inst){.type = INST_JMP, .value = i}
+#define DEF_INST_ZJMP(i) (Inst){.type = INST_ZJMP, .value = i}
+#define DEF_INST_NZJMP(i) (Inst){.type = INST_NZJMP, .value = i}
+#define DEF_INST_PRINT() (Inst){.type = INST_PRINT}
+#define DEF_INST_HALT() (Inst){.type = INST_HALT}
 
 void push(Machine *machine, int value);
 

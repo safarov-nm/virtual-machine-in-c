@@ -47,79 +47,97 @@ void generate_list(TokenNode **root, Lexer *lex) {
 
         switch(lex->tokens[i].type) {
         case TYPE_NONE:
-            printf("TYPE NONE\n");
+            assert(false && "Token should not be none\n");
             break;
         case TYPE_NOP:
-            printf("TYPE NOP\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_PUSH:
-            printf("TYPE PUSH\n");
+            append(root, lex->tokens[i]);
+            i++;
+            if (lex->tokens[i].type != TYPE_INT) {
+                fprintf(stderr, "ERROR: Expected type INT!\n");
+                exit(1);
+            }
+            append(root, lex->tokens[i]);
             break;
         case TYPE_POP:
-            printf("TYPE POP\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_DUP:
-            printf("TYPE DUP\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_INDUP:
-            printf("TYPE INDUP\n");
+            append(root, lex->tokens[i]);
+            i++;
+            if (lex->tokens[i].type != TYPE_INT) {
+                fprintf(stderr, "ERROR: Expected type INT!\n");
+                exit(1);
+            }
+            append(root, lex->tokens[i]);
             break;
         case TYPE_SWAP:
-            printf("TYPE SWAP\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_INSWAP:
-            printf("TYPE INSWAP\n");
+            append(root, lex->tokens[i]);
+            i++;
+            if (lex->tokens[i].type != TYPE_INT) {
+                fprintf(stderr, "ERROR: Expected type INT!\n");
+                exit(1);
+            }
+            append(root, lex->tokens[i]);
             break;
         case TYPE_ADD:
-            printf("TYPE ADD\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_SUB:
-            printf("TYPE SUB\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_MUL:
-            printf("TYPE MUL\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_DIV:
-            printf("TYPE DIV\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_MOD:
-            printf("TYPE MOD\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_CMPE:
-            printf("TYPE CMPE\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_CMPNE:
-            printf("TYPE CMPNE\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_CMPG:
-            printf("TYPE CMPG\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_CMPL:
-            printf("TYPE CMPL\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_CMPGE:
-            printf("TYPE CMPGE\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_CMPLE:
-            printf("TYPE CMPLE\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_JMP:
-            printf("TYPE JMP\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_ZJMP:
-            printf("TYPE ZJMP\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_NZJMP:
-            printf("TYPE NZJMP\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_PRINT:
-            printf("TYPE PRINT\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_HALT:
-            printf("TYPE HALT\n");
+            append(root, lex->tokens[i]);
             break;
         case TYPE_INT:
-            printf("TYPE INT\n");
+            append(root, lex->tokens[i]);
             break;
         }
 
@@ -133,8 +151,6 @@ TokenNode* parser(Lexer lex) {
     TokenNode *root = NULL;
 
     generate_list(&root, &lex);
-
-    print_list(root);
 
     return root;
 }

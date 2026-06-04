@@ -1,23 +1,5 @@
-push
-push
-nop
-pop
-indup
-swap
-inswap
-add
-sub
+push 5
+push 10
+push 10
 mul
-div
-mod
-cmpe
-cmpne
-cmpg
-cmpl
-cmpge
-cmple
-jmp
-zjmp
-nzjmp
-print
-halt
+swap
