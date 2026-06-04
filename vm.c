@@ -2,336 +2,303 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <limits.h>
 
-#define MAX_STACK_SIZE 1024
-
-typedef enum {
-    INST_NOP = 0,
-    INST_PUSH,
-    INST_POP,
-    INST_DUP,
-    INST_SWAP,
-    INST_ADD,
-    INST_SUB,
-    INST_MUL,
-    INST_DIV,
-    INST_MOD,
-    INST_CMPE,
-    INST_CMPNE,
-    INST_CMPG,
-    INST_CMPGE,
-    INST_CMPL,
-    INST_CMPLE,
-    INST_JMP,
-    INST_ZJMP,
-    INST_NZJMP,
-
-    INST_PRINT,
-    INST_HALT
-} Inst_Set;
-
-typedef struct {
-    Inst_Set type;
-    int value;
-} Inst;
-
-typedef struct {
-    int stack[MAX_STACK_SIZE];
-    int stack_size;
-    size_t program_size;
-    Inst *instructions;
-} Machine;
-
-#define DEF_INST_NOP(x) {.type = INST_NOP}
-#define DEF_INST_PUSH(x) {.type = INST_PUSH, .value = x}
-#define DEF_INST_POP() {.type = INST_POP}
-#define DEF_INST_DUP() {.type = INST_DUP}
-#define DEF_INST_SWAP() {.type = INST_SWAP}
-#define DEF_INST_ADD() {.type = INST_ADD}
-#define DEF_INST_SUB() {.type = INST_SUB}
-#define DEF_INST_MUL() {.type = INST_MUL}
-#define DEF_INST_DIV() {.type = INST_DIV}
-#define DEF_INST_MOD() {.type = INST_MOD}
-#define DEF_INST_CMPE() {.type = INST_CMPE}
-#define DEF_INST_CMPNE() {.type = INST_CMPNE}
-#define DEF_INST_CMPG() {.type = INST_CMPG}
-#define DEF_INST_CMPGE() {.type = INST_CMPGE}
-#define DEF_INST_CMPL() {.type = INST_CMPL}
-#define DEF_INST_CMPLE() {.type = INST_CMPLE}
-#define DEF_INST_JMP(x) {.type = INST_JMP, .value = x}
-#define DEF_INST_ZJMP(x) {.type = INST_ZJMP, .value = x}
-#define DEF_INST_NZJMP(x) {.type = INST_NZJMP, .value = x}
-#define DEF_INST_PRINT() {.type = INST_PRINT}
-#define DEF_INST_HALT(x) {.type = INST_HALT}
+#include "vm.h"
 
 Inst program[] = {
-
-
-	DEF_INST_PUSH(5),
-	DEF_INST_PUSH(10),
-	DEF_INST_JMP(0)
-
+    DEF_INST_PUSH(1),
+    DEF_INST_PUSH(4),
+    DEF_INST_PUSH(6),
+    DEF_INST_PUSH(8),
+    DEF_INST_PUSH(10),
+    DEF_INST_PUSH(12),
+    DEF_INST_INDUP(2),
 };
-
 #define PROGRAM_SIZE (sizeof(program)/sizeof(program[0]))
 
-void push(Machine *machine, int value) {
-    if (machine->stack_size >= MAX_STACK_SIZE) {
-        fprintf(stderr, "ERROR: Stack overflow\n");
+void push(Machine *machine, int value){
+    if(machine->stack_size >= MAX_STACK_SIZE){
+        fprintf(stderr, "ERROR: Stack Overflow\n");
         exit(1);
     }
     machine->stack[machine->stack_size] = value;
     machine->stack_size++;
 }
 
-int pop(Machine *machine) {
-    if (machine->stack_size <= 0) {
-        fprintf(stderr, "ERROR: Stack underflow\n");
+int pop(Machine *machine){
+    if(machine->stack_size <= 0){
+        fprintf(stderr, "ERROR: Stack Underflow\n");
         exit(1);
     }
     machine->stack_size--;
     return machine->stack[machine->stack_size];
 }
 
-void print_stack(Machine *machine) {
+void index_swap(Machine *machine, int index){
+    if(index >= machine->stack_size || index < 0){
+        fprintf(stderr, "ERROR: Index out of range\n");
+        exit(1);
+    }
+    int temp_value = machine->stack[index];
+    machine->stack[index] = pop(machine); 
+    push(machine, temp_value);
+}
 
-    // if (machine->stack_size == 0) return;
+void index_dup(Machine *machine, int index){
+    if(index >= machine->stack_size || index < 0){
+        fprintf(stderr, "ERROR: Index out of range\n");
+        exit(1);
+    }
+    push(machine, machine->stack[index]);
+}
 
-    putchar('\n');
-    printf("------ START OF STACK\n");
-    // printf("Stack (size = %d): ", machine->stack_size);
-    for (int i = machine->stack_size - 1; i >= 0; i--) {
+void print_stack(Machine *machine){
+    printf("------ STACK\n");
+    for(int i = machine->stack_size - 1; i >= 0; i--){
         printf("%d\n", machine->stack[i]);
     }
     printf("------ END OF STACK\n");
-    putchar('\n');
 }
 
-void write_program_to_file(Machine *machine, char *file_path) {
+void write_program_to_file(Machine *machine, char *file_path){
     FILE *file = fopen(file_path, "wb");
-    if (file == NULL) {
+    if(file == NULL){
         fprintf(stderr, "ERROR: Could not write to file %s\n", file_path);
         exit(1);
     }
 
-    fwrite(machine->instructions, sizeof(Inst), machine->program_size, file);
+    fwrite(machine->instructions, sizeof(machine->instructions[0]), machine->program_size, file);
+
     fclose(file);
 }
 
-Machine* read_program_from_file(char *file_path) {
+Machine *read_program_from_file(Machine *machine, char *file_path){
+    
     FILE *file = fopen(file_path, "rb");
-    if (file == NULL) {
+    if(file == NULL){
         fprintf(stderr, "ERROR: Could not read from file %s\n", file_path);
         exit(1);
     }
 
-    // Создаем новую машину
-    Machine *machine = malloc(sizeof(Machine));
-    if (!machine) {
-        fprintf(stderr, "ERROR: Memory allocation failed\n");
-        exit(1);
-    }
-    
-    // Инициализируем стек
-    machine->stack_size = 0;
-    
-    // Получаем размер файла
     fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
+    long length = ftell(file);
     fseek(file, 0, SEEK_SET);
-    
-    // Расчет размера программы
-    machine->program_size = file_size / sizeof(Inst);
-    
-    // Выделяем память под инструкции
-    machine->instructions = malloc(file_size);
-    if (!machine->instructions) {
-        fprintf(stderr, "ERROR: Memory allocation failed\n");
-        free(machine);
+
+    if (length <= 0) {
+        fprintf(stderr, "ERROR: Empty or invalid file\n");
+        fclose(file);
         exit(1);
     }
-    
-    size_t read_count = fread(machine->instructions, sizeof(Inst), 
-                             machine->program_size, file);
-    if (read_count != machine->program_size) {
-        fprintf(stderr, "ERROR: Failed to read program\n");
-        free(machine->instructions);
-        free(machine);
+
+    if (length % sizeof(Inst) != 0) {
+        fprintf(stderr, "ERROR: Corrupted program file (size mismatch)\n");
+        fclose(file);
         exit(1);
     }
-    
+
+    machine->program_size = length / sizeof(Inst);
+
+    Inst *instructions = malloc(sizeof(Inst) * machine->program_size);
+
+    size_t read_count = fread(instructions, sizeof(instructions[0]), machine->program_size, file);
+    if(read_count != machine->program_size){
+        fprintf(stderr, "ERROR: File is corrupted or truncated\n");
+        free(instructions);
+        fclose(file);
+        exit(1);
+    }
+
+    machine->instructions = instructions;
+
     fclose(file);
     return machine;
 }
 
-int main() {
+void run_instructions(Machine *machine){
     int a, b;
-
-    _Bool flag; // Убираем лишние выводы стека, когда совершается прыжок
-
-    // Создаем машину для записи
-    Machine *machine_to_write = malloc(sizeof(Machine));
-    machine_to_write->stack_size = 0;
-    machine_to_write->program_size = PROGRAM_SIZE;
-    machine_to_write->instructions = program;
-    
-    // Записываем программу в файл
-    write_program_to_file(machine_to_write, "test.vm");
-    
-    // Загружаем программу из файла в новую машину
-    Machine *loaded_machine = read_program_from_file("test.vm");
-    
-    printf("Loaded program with %zu instructions\n", loaded_machine->program_size);
-    
-    // Исполняем программу
-    for (size_t i = 0; i < loaded_machine->program_size; ++i) {
-        flag = 0;
-        // print_stack(loaded_machine);
-        switch (loaded_machine->instructions[i].type) {
+    for(size_t ip = 0; ip < machine->program_size; ip++){
+        switch(machine->instructions[ip].type){
             case INST_NOP:
                 continue;
                 break;
             case INST_PUSH:
-                push(loaded_machine, loaded_machine->instructions[i].value);
-                // printf("PUSH %d\n", loaded_machine->instructions[i].value);
+                push(machine, machine->instructions[ip].value);
                 break;
             case INST_POP:
-                // printf("POP: %d\n", pop(loaded_machine));
-                pop(loaded_machine);
+                pop(machine);
                 break;
             case INST_DUP:
-                a = pop(loaded_machine);
-                push(loaded_machine, a);
-                push(loaded_machine, a);
+                a = pop(machine);
+                push(machine, a);
+                push(machine, a);
+                break;
+            case INST_INDUP:
+                index_dup(machine, machine->instructions[ip].value);
                 break;
             case INST_SWAP:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a);
-                push(loaded_machine, b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, a);
+                push(machine, b);
+                break;
+            case INST_INSWAP:
+                index_swap(machine, machine->instructions[ip].value);
                 break;
             case INST_ADD:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a + b);
-                // printf("ADD: %d + %d = %d\n", a, b, a + b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, a + b);
                 break;
             case INST_SUB:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a - b);
-                // printf("SUB: %d - %d = %d\n", a, b, a - b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, a - b);
                 break;
             case INST_MUL:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a * b);
-                //printf("MUL: %d * %d = %d\n", a, b, a * b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, a * b);
                 break;
             case INST_DIV:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                if (b == 0) {
-                    fprintf(stderr, "ERROR: Division by zero\n");
+                a = pop(machine);
+                b = pop(machine);
+                if(b == 0){
+                    fprintf(stderr, "ERROR: Cannot divide by 0\n");
                     exit(1);
                 }
-                push(loaded_machine, a / b);
-                // printf("DIV: %d / %d = %d\n", a, b, a / b);
+                push(machine, a / b);
                 break;
             case INST_MOD:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a % b);
-                // printf("MOD: %d % %d = %d\n", a, b, a % b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, a % b);
                 break;
             case INST_CMPE:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a == b);
-                // printf("EQUAL: %d == %d = %d\n", a, b, a == b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, b);
+                push(machine, a);
+                if(a == b){
+                    push(machine, 1);
+                } else {
+                    push(machine, 0);
+                }
                 break;
             case INST_CMPNE:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a != b);
-                // printf("NOT EQUAL: %d != %d = %d\n", a, b, a != b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, b);
+                push(machine, a);
+                if(a != b){
+                    push(machine, 1);
+                } else {
+                    push(machine, 0);
+                }
                 break;
             case INST_CMPG:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a > b);
-                // printf("GREAT: %d > %d = %d\n", a, b, a > b);
-                break;
-            case INST_CMPGE:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a >= b);
-                // printf("GREAT: %d >= %d = %d\n", a, b, a >= b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, b);
+                push(machine, a);
+                if(a > b){
+                    push(machine, 1);
+                } else {
+                    push(machine, 0);
+                }
                 break;
             case INST_CMPL:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a < b);
-                // printf("LESS: %d < %d = %d\n", a, b, a < b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, b);
+                push(machine, a);
+                if(a < b){
+                    push(machine, 1);
+                } else {
+                    push(machine, 0);
+                }
+                break;
+            case INST_CMPGE:
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, b);
+                push(machine, a);
+                if(a >= b){
+                    push(machine, 1);
+                } else {
+                    push(machine, 0);
+                }
                 break;
             case INST_CMPLE:
-                a = pop(loaded_machine);
-                b = pop(loaded_machine);
-                push(loaded_machine, a <= b);
-                // printf("LESS: %d <= %d = %d\n", a, b, a <= b);
+                a = pop(machine);
+                b = pop(machine);
+                push(machine, b);
+                push(machine, a);
+                if(a <= b){
+                    push(machine, 1);
+                } else {
+                    push(machine, 0);
+                }
                 break;
             case INST_JMP:
-                flag = 1;
-                if (loaded_machine->instructions[i].value < 0 || loaded_machine->instructions[i].value >= (int)loaded_machine->program_size) {
-                    fprintf(stderr,  "ERROR: Jump out of bounds\n");
+                ip = machine->instructions[ip].value - 1;
+                if(ip + 1 >= machine->program_size){
+                    fprintf(stderr, "ERROR: Cannot jump out of bounds\n");
                     exit(1);
                 }
-
-                i = loaded_machine->instructions[i].value - 1; // -1 компенсирует i++ в for
-
                 break;
             case INST_ZJMP:
-                flag = 1;
-                if (pop(loaded_machine) == 0){
-                    if (loaded_machine->instructions[i].value < 0 || loaded_machine->instructions[i].value >= (int)loaded_machine->program_size) {
-                        fprintf(stderr,  "ERROR: Jump out of bounds\n");
+                if(pop(machine) == 0){
+                    ip = machine->instructions[ip].value - 1;
+                    if(ip + 1 >= machine->program_size){
+                        fprintf(stderr, "ERROR: Cannot jump out of bounds\n");
                         exit(1);
                     }
-                    i = loaded_machine->instructions[i].value - 1; // loaded_machine->instructions[i].value = target
+                } else {
+                    continue;
                 }
                 break;
             case INST_NZJMP:
-                flag = 1;
-                if (pop(loaded_machine) != 0){
-                    if (loaded_machine->instructions[i].value < 0 || loaded_machine->instructions[i].value >= (int)loaded_machine->program_size) {
-                        fprintf(stderr,  "ERROR: Jump out of bounds\n");
+                if(pop(machine) != 0){
+                    ip = machine->instructions[ip].value - 1;
+                    if(ip + 1 >= machine->program_size){
+                        fprintf(stderr, "ERROR: Cannot jump out of bounds\n");
                         exit(1);
                     }
-                    i = loaded_machine->instructions[i].value - 1;
+                } else {
+                    continue;
                 }
                 break;
             case INST_PRINT:
-                // flag = 1;
-                // printf("PRINT TOP STACK: %d\n", loaded_machine->stack_size == 0 ? INT_MIN : loaded_machine->stack[loaded_machine->stack_size - 1]);
-                printf("PRINT: %d\n", pop(loaded_machine));
+                printf("%d\n", pop(machine));
                 break;
             case INST_HALT:
-                i = loaded_machine->program_size;
+                ip = machine->program_size;
                 break;
         }
-        if (!flag) print_stack(loaded_machine);
     }
+
+}
+
+int main(){
+    lexer();
+    Machine *loaded_machine = malloc(sizeof(Machine));
+    if (loaded_machine == NULL) {
+        fprintf(stderr, "ERROR: Couldn't allocate memory for the machine\n");
+        exit(1);
+    }
+
+    loaded_machine->stack_size = 0;
+    loaded_machine->program_size = PROGRAM_SIZE;
+    loaded_machine->instructions = program;
     
-
-
-
+    write_program_to_file(loaded_machine, "test.vm");
+    loaded_machine = read_program_from_file(loaded_machine, "test.vm");
+    
+    run_instructions(loaded_machine);
     // print_stack(loaded_machine);
 
-    // Освобождаем память
-    free(machine_to_write);
     free(loaded_machine->instructions);
     free(loaded_machine);
-    
+
     return 0;
 }
